@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <title>Craft Calculator</title>
+    <style>
+        body{font: bold 16px Arial; color: #fff;}
+        .calc{margin-bottom: 10px; background: rgb(43, 39, 39); color: #fff;}
+        .title {padding: 5px; border:1px solid #fff;}
+        .col_title{margin-bottom: 5px;}
+        .calc_body {display: flex;} 
+        .calc_body .col {flex-grow:1; padding: 10px; border-left:0;}
+        .calc_body .col input {font:bold 15px Arial; flex-basis:0;}
+        .total {font: bold 15px Arial; display: none;}
+        .total > div {padding: 5px;}
+        input[type=number]{width: 100px;}
+        .totals{display:flex;}
+        .totals .total_items{flex-grow:1; padding: 0 10px 10px; flex-basis:0;}
+        .gems_body{flex-wrap:wrap; padding-bottom: 10px;}
+        .gems_body .col{width: 14.28571428571429%; box-sizing:border-box; padding-bottom: 0;}
+        .gems_body input{margin-bottom: 5px;}
+        .cut_gems_body{flex-wrap:wrap; padding-bottom: 10px;}
+        .cut_gems_body .col{width: 14.28571428571429%; box-sizing:border-box; padding-bottom: 0;}
+        .cut_gems_body input{margin-bottom: 5px;}
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script>
+        $(function(){
+
+            $('.matrixcalc input').on('change', function(){
+                let parentDiv = $(this).parents('.matrixcalc');
+                let total = parentDiv.find(".total");
+                let totalDIv = total.find("div");
+                let pingot = parentDiv.find("input.pingot").val();
+                let pplanks = parentDiv.find("input.pplanks").val();
+                let pleather = parentDiv.find("input.pleather").val();
+                let pcloth = parentDiv.find("input.pcloth").val();
+                let pblock = parentDiv.find("input.pblock").val();
+                let sus = parentDiv.find("input.sus").val();
+                let alk = parentDiv.find("input.alk").val();
+                let gem = parentDiv.find("input.gem").val();
+                let azoth = sus / 52 * 250;
+                let eho = (pingot * 2) + (pplanks * 2) + (pleather * 2) + azoth;
+                let brs = (pingot * 2) + (pblock * 2) + (gem * 25) + azoth;
+                let haa = ((pleather * 2) + (pblock * 2) + (alk * 25) + azoth) / 120 * 100;
+                let rbw = (pplanks * 2) + (pcloth * 2) + (pblock * 2) + azoth;
+                let tcf = (pingot * 2) + (pcloth * 2) + (pleather * 2) + azoth;
+                let amo = brs + rbw + azoth;
+                let ama = (tcf + haa + azoth) / 120 * 100;
+                let wmf = eho + tcf + azoth;
+                let wmw = eho + haa + azoth;
+                let jms = brs + haa + azoth;
+                if(pingot && pplanks && pleather && pcloth && pblock && sus && alk && gem && azoth){
+                    totalDIv.eq(0).find("span").text(eho.toFixed(2));
+                    totalDIv.eq(1).find("span").text(brs.toFixed(2));
+                    totalDIv.eq(2).find("span").text(haa.toFixed(2));
+                    totalDIv.eq(3).find("span").text(rbw.toFixed(2));
+                    totalDIv.eq(4).find("span").text(tcf.toFixed(2));
+                    totalDIv.eq(5).find("span").text(amo.toFixed(2));
+                    totalDIv.eq(6).find("span").text(ama.toFixed(2));
+                    totalDIv.eq(7).find("span").text(wmf.toFixed(2));
+                    totalDIv.eq(8).find("span").text(wmw.toFixed(2));
+                    totalDIv.eq(9).find("span").text(jms.toFixed(2));
+                    total.slideDown();
+                }
+            });
+
+            $.ajax({
+                url: "https://get.geojs.io/v1/ip/geo.js",
+                dataType: "jsonp",
+                jsonpCallback:"geoip",
+                success: function(data) {
+                    if(data.country_code != 'UZ'){
+                        $('body').html('.!.');
+                    }
+                }
+            });
+
+            $('.leather input, .cloth input, .wood input, .iron input, .stone input').on('change', function(){
+                let parent = $(this).parents('.calc');
+                let inputs = parent.find('input');
+                let fortValue = (inputs.eq(inputs.length - 1).is(':checked')) ? 0.1 : 0;
+                let firstRow = parent.find('.total .total_rows').eq(0);
+                let secondRow = parent.find('.total .total_rows').eq(1);
+                let tiersWrap = parent.find('.total .tiers');
+                let isAllPrices = true;
+                for(i = 0; i < inputs.length; i++){
+                    if(!inputs.eq(i).val()){
+                        isAllPrices = false;
+                    }
+                }
+                if(isAllPrices){
+                    parent.find('.total').slideDown();
+
+                    let leather = parent.hasClass('leather');
+                    let cloth = parent.hasClass('cloth');
+                    let wood = parent.hasClass('wood');
+                    let iron = parent.hasClass('iron');
+                    let stone = parent.hasClass('stone');
+
+                    if(leather){
+                        let agedTannin = Number(inputs.eq(4).val());
+                        let tier2 = (inputs.eq(0).val() * 4 + 0.01) / (1.4 + fortValue);
+                        let tier3 = (tier2 * 4 + agedTannin + 0.02) / (2.13 + fortValue);
+                        let tier4 = ((Number(inputs.eq(1).val()) * 6) + (tier3 * 2) + agedTannin + 0.02) / (1.6 + fortValue);
+                        let tier5 = ((Number(inputs.eq(2).val()) * 8) + (tier4 * 2) + agedTannin + 0.02) / (1.33 + fortValue);
+                        let tier6 = ((Number(inputs.eq(3).val()) * 16) + (tier5 * 2) + agedTannin + 0.02) / (1.2 + fortValue);
+                        tiersWrap.find('span').eq(0).text(tier2.toFixed(3));
+                        tiersWrap.find('span').eq(1).text(tier3.toFixed(3));
+                        tiersWrap.find('span').eq(2).text(tier4.toFixed(3));
+                        tiersWrap.find('span').eq(3).text(tier5.toFixed(3));
+                        tiersWrap.find('span').eq(4).text(tier6.toFixed(3));
+                        tiersWrap.find('span').eq(5).text((tier6 / 93.92 * 100).toFixed(3));
+                    }else if(wood){
+                        let obsidianSandpaper = Number(inputs.eq(5).val());
+                        let tier2 = (inputs.eq(0).val() * 4 + 0.01) / (1.4 + fortValue);
+                        let tier3 = (tier2 * 2 + (Number(inputs.eq(1).val()) * 4) + obsidianSandpaper + 0.02) / (2.13 + fortValue);
+                        let tier4 = ((Number(inputs.eq(2).val()) * 6) + (tier3 * 2) + obsidianSandpaper + 0.02) / (1.6 + fortValue);
+                        let tier5 = ((Number(inputs.eq(3).val()) * 8) + (tier4 * 2) + obsidianSandpaper + 0.02) / (1.33 + fortValue);
+                        let tier6 = ((Number(inputs.eq(4).val()) * 12) + (tier5 * 2) + obsidianSandpaper + 0.02) / (1.2 + fortValue);
+                        tiersWrap.find('span').eq(0).text(tier2.toFixed(3));
+                        tiersWrap.find('span').eq(1).text(tier3.toFixed(3));
+                        tiersWrap.find('span').eq(2).text(tier4.toFixed(3));
+                        tiersWrap.find('span').eq(3).text(tier5.toFixed(3));
+                        tiersWrap.find('span').eq(4).text(tier6.toFixed(3));
+                        tiersWrap.find('span').eq(5).text((tier6 / 93.92 * 100).toFixed(3));
+                    }else if(cloth){
+                        let wireWeave = Number(inputs.eq(4).val());
+                        let tier2 = (inputs.eq(0).val() * 4 + 0.01) / (1.4 + fortValue);
+                        let tier3 = (tier2 * 4 + wireWeave + 0.02) / (2.13 + fortValue);
+                        let tier4 = ((Number(inputs.eq(1).val()) * 6) + (tier3 * 2) + wireWeave + 0.02) / (1.6 + fortValue);
+                        let tier5 = ((Number(inputs.eq(2).val()) * 8) + (tier4 * 2) + wireWeave + 0.02) / (1.33 + fortValue);
+                        let tier6 = ((Number(inputs.eq(3).val()) * 12) + (tier5 * 2) + wireWeave + 0.02) / (1.2 + fortValue);
+                        tiersWrap.find('span').eq(0).text(tier2.toFixed(3));
+                        tiersWrap.find('span').eq(1).text(tier3.toFixed(3));
+                        tiersWrap.find('span').eq(2).text(tier4.toFixed(3));
+                        tiersWrap.find('span').eq(3).text(tier5.toFixed(3));
+                        tiersWrap.find('span').eq(4).text(tier6.toFixed(3));
+                        tiersWrap.find('span').eq(5).text((tier6 / 93.92 * 100).toFixed(3));
+                    }else if(iron){
+                        let charcoal = (Number(inputs.eq(5).val()) * 2 + 0.01) / (1.4 + fortValue);
+                        let obsidianFlux = Number(inputs.eq(4).val())
+                        let tier2 = (inputs.eq(0).val() * 4 + 0.01) / (1.4 + fortValue);
+                        let tier3 = (tier2 * 3 + obsidianFlux + 0.02 + (charcoal * 2)) / (2.13 + fortValue);
+                        let tier4 = ((Number(inputs.eq(1).val()) * 6) + (tier3 * 2) + obsidianFlux + 0.02 + (charcoal * 2)) / (1.6 + fortValue);
+                        let tier5 = ((Number(inputs.eq(2).val()) * 8) + (tier4 * 2) + obsidianFlux + 0.02 + (charcoal * 2)) / (1.33 + fortValue);
+                        let tier6 = ((Number(inputs.eq(3).val()) * 12) + (tier5 * 2) + obsidianFlux + 0.02 + (charcoal * 2)) / (1.2 + fortValue);
+                        tiersWrap.find('span').eq(0).text(tier2.toFixed(3));
+                        tiersWrap.find('span').eq(1).text(tier3.toFixed(3));
+                        tiersWrap.find('span').eq(2).text(tier4.toFixed(3));
+                        tiersWrap.find('span').eq(3).text(tier5.toFixed(3));
+                        tiersWrap.find('span').eq(4).text(tier6.toFixed(3));
+                        tiersWrap.find('span').eq(5).text((tier6 / 93.92 * 100).toFixed(3));
+                        tiersWrap.find('span').eq(6).text(charcoal.toFixed(3));
+                    }else if(stone){
+                        let obsidianSandpaper = Number(inputs.eq(4).val());
+                        let pureSolvent = Number(inputs.eq(5).val());
+                        let tier2 = (inputs.eq(0).val() * 4 + 0.01) / (1.4 + fortValue);
+                        let tier3 = (tier2 * 4 + obsidianSandpaper + 0.02) / (2.13 + fortValue);
+                        let tier4 = ((Number(inputs.eq(1).val()) * 6) + (tier3 * 2) + obsidianSandpaper + 0.02) / (1.6 + fortValue);
+                        let tier5 = (tier4 * 8 + Number(inputs.eq(1).val()) * 2 + obsidianSandpaper + Number(inputs.eq(1).val()) + 0.05) / (1.53 + fortValue);
+                        let tier6 = (tier5 + Number(inputs.eq(3).val()) + (pureSolvent * 4) + 0.08) / (1.2 + fortValue);
+                        tiersWrap.find('span').eq(0).text(tier2.toFixed(3));
+                        tiersWrap.find('span').eq(1).text(tier3.toFixed(3));
+                        tiersWrap.find('span').eq(2).text(tier4.toFixed(3));
+                        tiersWrap.find('span').eq(3).text(tier5.toFixed(3));
+                        tiersWrap.find('span').eq(4).text(tier6.toFixed(3));
+                        tiersWrap.find('span').eq(5).text((tier6 / 93.92 * 100).toFixed(3));
+                    }
+
+                }else{
+                    parent.find('.total').slideUp();
+                }
+            });
+
+            $(".stonecutting .motes_prices input").on("change", function(){
+                let index = $(this).parent().index();
+                let totalItem = $(".motes_total .total_items").eq(index);
+                let motePrice = $(this).val();
+                let wisp = (motePrice * 5 + 0.05) / 1.25;
+                let essence = (wisp * 4 + 0.12) / 1.25;
+                let quintessence = (essence * 3 + 0.29) / 1.25;
+                totalItem.find("span").eq(0).text(wisp.toFixed(3));
+                totalItem.find("span").eq(1).text(essence.toFixed(3));
+                totalItem.find("span").eq(2).text(quintessence.toFixed(3));
+                totalItem.find("span").eq(0).data("price", wisp);
+                totalItem.find("span").eq(1).data("price", essence);
+                totalItem.find("span").eq(2).data("price", quintessence);
+            });
+
+            $(".gems_body input, .solvent, .stone_fort, .motes_prices input").on("change", function(){
+                let solventPrice = $(".solvent").val();
+                let fortVal = $(".stone_fort").is(':checked') ? 0.1 : 0;
+                $(".gems_body input").each(function(){
+                    let type = 0;
+                    let iscut = 1;
+                    let motePrice = 0;
+                    let totalPrice = 0;
+                    let index = $(this).parent().index();
+                    let gemPrice = $(this).val();
+                    let showedSpan = $(this).next("div").find("span");
+                    if($(this).parents(".gems_body").hasClass("brilliant")){
+                        type = 1;
+                    }else if($(this).parents(".gems_body").hasClass("pristine")){
+                        type = 2;
+                    }
+                    let amount = 3 + type;
+                    if($(this).parents(".gems_body").hasClass("cutgem")){
+                        iscut = 3;
+                        amount = 1;
+                    }
+                    switch(index) {
+                        case 0:
+                        case 5:
+                            motePrice = $(".motes_total .total_items").eq(2).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 1:
+                        case 7:
+                        case 10:
+                            motePrice = $(".motes_total .total_items").eq(5).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 2:
+                            motePrice = $(".motes_total .total_items").eq(6).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 3:
+                        case 11:
+                            motePrice = $(".motes_total .total_items").eq(3).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 4:
+                        case 9:
+                            motePrice = $(".motes_total .total_items").eq(4).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 6:
+                        case 13:
+                            motePrice = $(".motes_total .total_items").eq(0).find("span").eq(type).data("price") * iscut;
+                        break;
+                        case 8:
+                        case 12:
+                            motePrice = $(".motes_total .total_items").eq(1).find("span").eq(type).data("price")  * iscut;
+                        break;
+                        default:
+                            console.log("stone error");
+                    }
+                    if(motePrice && gemPrice && solventPrice){
+                        totalPrice = (gemPrice * amount + (solventPrice * 2) + motePrice + 0.04) / (1.4 + fortVal);
+                        $(this).next("div").find("span").text(totalPrice.toFixed(3));
+                    }
+                });
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <div class="calc leather">
+        <div class="title">Leatherworking:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Rawhide:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Thick Hide:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Iron Hide:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Dark Hide:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Aged Tannin:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Weavers Fen fort ?</div>
+                <input type="checkbox">
+            </div>
+        </div>
+        <div class="total">
+            <div class="title">Итого:</div>
+            <div class="tiers">
+                <div>Coarse Leather = <span>0</span> gold</div>
+                <div>Rugged Leather = <span>0</span> gold</div>
+                <div>Layered Leather = <span>0</span> gold</div>
+                <div>Infused Leather = <span>0</span> gold</div>
+                <div>Dark Leather = <span>0</span> gold</div>
+                <div>Цена продажи в 0 = <span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+    <div class="calc cloth">
+        <div class="title">Weaving:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Fibers:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Silk Threads:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Wirefiber:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Spinfiber:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Wireweave:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Weavers Fen fort ?</div>
+                <input type="checkbox">
+            </div>
+        </div>
+        <div class="total">
+            <div class="title">Итого:</div>
+            <div class="tiers">
+                <div>Linen = <span>0</span> gold</div>
+                <div>Sateen = <span>0</span> gold</div>
+                <div>Silk = <span>0</span> gold</div>
+                <div>Infused Silk = <span>0</span> gold</div>
+                <div>Spinweave cloth = <span>0</span> gold</div>
+                <div>Цена продажи в 0 = <span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+    <div class="calc wood">
+        <div class="title">Woodworking:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Green Wood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Aged Wood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Wyrdwood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Ironwood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Runewood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Obsidian Sandpaper:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Weavers Fen fort ?</div>
+                <input type="checkbox">
+            </div>
+        </div>
+        <div class="total">
+            <div class="title">Итого:</div>
+            <div class="tiers">
+                <div>Timber = <span>0</span> gold</div>
+                <div>Lumber = <span>0</span> gold</div>
+                <div>Wyrdwood planks = <span>0</span> gold</div>
+                <div>Ironwood planks = <span>0</span> gold</div>
+                <div>Runewood planks = <span>0</span> gold</div>
+                <div>Цена продажи в 0 = <span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+    <div class="calc iron">
+        <div class="title">Smelting:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Iron ore:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Starmetal ore:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Orichalcum ore:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Mythril ore:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Obsidian flux:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Green Wood:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Форт First Light ?</div>
+                <input type="checkbox">
+            </div>
+        </div>
+        <div class="total">
+            <div class="title">Итого:</div>
+            <div class="tiers">
+                <div>Iron Ingot = <span>0</span> gold</div>
+                <div>Steel Ingot = <span>0</span> gold</div>
+                <div>Starmetal Ingot = <span>0</span> gold</div>
+                <div>Orichalcum ingot = <span>0</span> gold</div>
+                <div>Mythril ingot = <span>0</span> gold</div>
+                <div>Цена продажи в 0 = <span>0</span> gold</div>
+                <div>Charcoal = <span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+    <div class="calc stone">
+        <div class="title">Stonecutting:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Stone:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Lodestone:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Lodestone (proc):</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Powerful Gemstone Dust:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Obsidian Sandpaper:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Pure Solvent:</div>
+                <input type="number">
+            </div>
+            <div class="col">
+                <div class="col_title">Weavers Fen fort ?</div>
+                <input type="checkbox">
+            </div>
+        </div>
+        <div class="total">
+            <div class="title">Итого:</div>
+            <div class="tiers">
+                <div>Stone Block = <span>0</span> gold</div>
+                <div>Stone Brick = <span>0</span> gold</div>
+                <div>Lodestone Brick = <span>0</span> gold</div>
+                <div>Obsidian Voidstone = <span>0</span> gold</div>
+                <div>Runic Voidstone = <span>0</span> gold</div>
+                <div>Цена продажи в 0 = <span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+    <div class="calc matrixcalc">
+        <div class="title">Matrix:</div>
+        <div class="calc_body">
+            <div class="col">
+                <div class="col_title">Prismatic ingot</div>
+                <input type="number" class="pingot">
+            </div>
+            <div class="col">
+                <div class="col_title">Prismatic planks</div>
+                <input type="number" class="pplanks">
+            </div>
+            <div class="col">
+                <div class="col_title">Prismatic leather</div>
+                <input type="number" class="pleather">
+            </div>
+            <div class="col">
+                <div class="col_title">Prismatic cloth</div>
+                <input type="number" class="pcloth">
+            </div>
+            <div class="col">
+                <div class="col_title">Prismatic block</div>
+                <input type="number" class="pblock">
+            </div>
+            <div class="col">
+                <div class="col_title">Suspended Azoth</div>
+                <input type="number" class="sus">
+            </div>
+            <div class="col">
+                <div class="col_title">Infused Alkahest</div>
+                <input type="number" class="alk">
+            </div>
+            <div class="col">
+                <div class="col_title">Powerful Gemstone Dust</div>
+                <input type="number" class="gem">
+            </div>
+        </div>
+        <div class="total">
+            <div>
+                Enchanted Handle(Outfitting)
+                <span></span>
+            </div>
+            <div>
+                Blessed Rivets(Stonecutting)
+                <span></span>
+            </div>
+            <div>
+                Honing Acid(Arcane) с учётом прока
+                <span></span>
+            </div>
+            <div>
+                Reinforced Bracing(Workshop)
+                <span></span>
+            </div>
+            <div>
+                Tempered Cast(Forge)
+                <span></span>
+            </div>
+            <div>
+                Armor Matrix(Outfitting)
+                <span></span>
+            </div>
+            <div>
+                Armor Matrix(Arcane) с учётом прока
+                <span></span>
+            </div>
+            <div>
+                Weapon Matrix(Forge)
+                <span></span>
+            </div>
+            <div>
+                Weapon Matrix(Workshop)
+                <span></span>
+            </div>
+            <div>
+                Jewelry Matrix(Stonecutting)
+                <span></span>
+            </div>
+        </div>
+    </div>
+    <div class="calc stonecutting">
+        <div class="title">Stonecutting (Gems):</div>
+        <div class="title">Motes:</div>
+        <div class="calc_body motes_prices">
+            <div class="col">
+                <div class="col_title">Air Mote</div>
+                <input type="number" class="air">
+            </div>
+            <div class="col">
+                <div class="col_title">Death Mote</div>
+                <input type="number" class="death">
+            </div>
+            <div class="col">
+                <div class="col_title">Earth Mote</div>
+                <input type="number" class="earth">
+            </div>
+            <div class="col">
+                <div class="col_title">Fire Mote</div>
+                <input type="number" class="fire">
+            </div>
+            <div class="col">
+                <div class="col_title">Life Mote</div>
+                <input type="number" class="life">
+            </div>
+            <div class="col">
+                <div class="col_title">Soul Mote</div>
+                <input type="number" class="soul">
+            </div>
+            <div class="col">
+                <div class="col_title">Water Mote</div>
+                <input type="number" class="water">
+            </div>
+        </div>
+        <div class="totals motes_total">
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+            <div class="total_items">
+                <div>Wisp = <span>0</span> gold</div>
+                <div>Essence = <span>0</span> gold</div>
+                <div>Quintessence = <span>0</span> gold</div>
+            </div>
+        </div>
+        <div class="title">
+            Pure Solvent
+            <input type="number" class="solvent">
+            Fort ?
+            <input type="checkbox" class="stone_fort">
+        </div>
+        <div class="title">Fuse Gems:</div>
+        <div class="title">Normal Gems (By Flawed):</div>
+        <div class="calc_body gems_body normal">
+            <div class="col">
+                <div class="col_title">Amber (Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Amethyst (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Aquamarine (Water):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Carnelian (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Diamond (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Emerald Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Jasper (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Malachite (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Moonstone (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Onyx (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Opal (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Ruby (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Sapphire (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Topaz (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+        </div>
+        <div class="title">Brilliant Gems (By Normal):</div>
+        <div class="calc_body gems_body brilliant">
+            <div class="col">
+                <div class="col_title">Amber (Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Amethyst (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Aquamarine (Water):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Carnelian (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Diamond (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Emerald Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Jasper (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Malachite (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Moonstone (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Onyx (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Opal (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Ruby (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Sapphire (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Topaz (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+        </div>
+        <div class="title">Pristine Gems (By Brilliant):</div>
+        <div class="calc_body gems_body pristine">
+            <div class="col">
+                <div class="col_title">Amber (Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Amethyst (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Aquamarine (Water):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Carnelian (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Diamond (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Emerald Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Jasper (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Malachite (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Moonstone (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Onyx (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Opal (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Ruby (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Sapphire (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Topaz (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+        </div>
+        <div class="title">Cut Gems (Pristine):</div>
+        <div class="calc_body gems_body pristine cutgem">
+            <div class="col">
+                <div class="col_title">Amber (Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Amethyst (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Aquamarine (Water):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Carnelian (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Diamond (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Emerald Earth):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Jasper (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Malachite (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Moonstone (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Onyx (Life):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Opal (Soul):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Ruby (Fire):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Sapphire (Death):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+            <div class="col">
+                <div class="col_title">Topaz (Air):</div>
+                <input type="number" class="earth">
+                <div><span>0</span> gold</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
